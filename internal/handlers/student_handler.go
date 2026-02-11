@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"strconv"
+
 	"github.com/dvvnFrtn/sisima/internal/dto"
 	model "github.com/dvvnFrtn/sisima/internal/models"
 	service "github.com/dvvnFrtn/sisima/internal/services"
@@ -20,7 +22,30 @@ func NewStudentHandler(s service.StudentService) *studentHandler {
 
 // method
 func (h *studentHandler) FindAllPaginated(c fiber.Ctx) error {
-	data, err := h.service.FindAllPaginated(0, 3)
+	const (
+		defaultPage  = 1
+		defaultLimit = 10
+		defaultSort  = "full_name"
+		defaultOrder = "ASC"
+	)
+
+	pageStr := c.Query("page", strconv.Itoa(defaultPage))
+	limitStr := c.Query("limit", strconv.Itoa(defaultLimit))
+	sort := c.Query("sort", defaultSort)
+	order := c.Query("order", defaultOrder)
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = defaultPage
+	}
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit < 1 {
+		limit = defaultLimit
+	}
+
+	students, total, err := h.service.FindAllPaginated(page, limit, sort, order)
+
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"title":  "INTERNAL_ERROR",
@@ -28,7 +53,15 @@ func (h *studentHandler) FindAllPaginated(c fiber.Ctx) error {
 		})
 	}
 
-	return c.Status(200).JSON(data)
+	response := dto.NewPagination(make([]interface{}, len(students)), page, limit, total)
+
+	for i, v := range students {
+		var student model.Student
+		student = v
+		response.Data[i] = dto.ToStudentResponse(&student)
+	}
+
+	return c.Status(200).JSON(response)
 }
 
 func (h *studentHandler) FindDetailById(c fiber.Ctx) error {
