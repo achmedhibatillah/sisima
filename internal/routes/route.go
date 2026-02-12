@@ -19,4 +19,5 @@ func StudentRoutes(app *fiber.App) {
 	resource.Get("", handler.FindAllPaginated)
 	resource.Get("/:id", handler.FindDetailById)
 	resource.Post("", handler.Create)
+	resource.Delete("/:id", handler.Delete)
 }
