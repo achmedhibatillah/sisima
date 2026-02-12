@@ -6,16 +6,15 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-func IndexRoutes(app *fiber.App) {
+func RegisterRoutes(app *fiber.App) {
+	// index resource
 	app.Get("/", handler.IndexHandler)
-}
 
-func StudentRoutes(app *fiber.App) {
+	// student resources
 	service := service.NewStudentService()
 	handler := handler.NewStudentHandler(service)
 
 	resource := app.Group("/student")
-
 	resource.Get("", handler.FindAllPaginated)
 	resource.Get("/:id", handler.FindDetailById)
 	resource.Post("", handler.Create)
