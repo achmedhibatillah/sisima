@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -145,6 +146,7 @@ func (h *studentHandler) Delete(c fiber.Ctx) error {
 
 	err = h.service.DeleteById(id, option)
 	if err != nil {
+		fmt.Println(err)
 		return c.Status(500).JSON(fiber.Map{
 			"title":  "INTERNAL_ERROR",
 			"errors": err,
