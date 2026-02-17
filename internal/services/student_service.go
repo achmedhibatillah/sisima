@@ -87,7 +87,7 @@ func (s *studentService) DeleteById(id uuid.UUID, option enums.DeleteOptions) er
 			return tx.Error
 		}
 		if tx.RowsAffected == 0 {
-			return errors.New("not-found-or-already-deleted")
+			return errors.New("error-0-result")
 		}
 		return nil
 
@@ -99,7 +99,7 @@ func (s *studentService) DeleteById(id uuid.UUID, option enums.DeleteOptions) er
 			return tx.Error
 		}
 		if tx.RowsAffected == 0 {
-			return errors.New("not-deleted-or-not-found")
+			return errors.New("error-0-result")
 		}
 		return nil
 

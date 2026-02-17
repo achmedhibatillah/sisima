@@ -11,8 +11,6 @@ func Migrate() {
 
 	err := db.AutoMigrate(
 		&Student{},
-		&AcademicYear{},
-		&Class{},
 		// &OtherModel{},
 	)
 
