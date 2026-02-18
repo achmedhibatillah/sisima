@@ -4,10 +4,10 @@ import (
 	"errors"
 	"time"
 
-	"github.com/dvvnFrtn/sisima/internal/config"
 	"github.com/dvvnFrtn/sisima/internal/enums"
 	model "github.com/dvvnFrtn/sisima/internal/models"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type StudentService interface {
@@ -19,21 +19,25 @@ type StudentService interface {
 }
 
 // struct
-type studentService struct{}
+type studentService struct {
+	db *gorm.DB
+}
 
 // constructor
-func NewStudentService() StudentService {
-	return &studentService{}
+func NewStudentService(db *gorm.DB) StudentService {
+	return &studentService{
+		db,
+	}
 }
 
 // method
 func (s *studentService) Create(student *model.Student) error {
-	return config.DB.Create(student).Error
+	return s.db.Create(student).Error
 }
 
 func (s *studentService) FindAll() ([]model.Student, error) {
 	var students []model.Student
-	err := config.DB.Find(&students).Error
+	err := s.db.Find(&students).Error
 	return students, err
 }
 
@@ -43,7 +47,7 @@ func (s *studentService) FindAllPaginated(page, limit int, sort, order string, d
 	var total int64
 	var err error
 
-	db := config.DB.Model(&model.Student{})
+	db := s.db.Model(&model.Student{})
 
 	if deleted {
 		db = db.Where("deleted_at IS NOT NULL")
@@ -70,7 +74,7 @@ func (s *studentService) FindAllPaginated(page, limit int, sort, order string, d
 
 func (s *studentService) FindDetailById(id uuid.UUID) (*model.Student, error) {
 	var student model.Student
-	err := config.DB.First(&student, "id = ?", id).Error
+	err := s.db.First(&student, "id = ?", id).Error
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +85,7 @@ func (s *studentService) DeleteById(id uuid.UUID, option enums.DeleteOptions) er
 	switch option {
 
 	case enums.Normal:
-		tx := config.DB.Model(&model.Student{}).Where("id = ? AND deleted_at IS NULL", id).Update("deleted_at", time.Now())
+		tx := s.db.Model(&model.Student{}).Where("id = ? AND deleted_at IS NULL", id).Update("deleted_at", time.Now())
 
 		if tx.Error != nil {
 			return tx.Error
@@ -93,7 +97,7 @@ func (s *studentService) DeleteById(id uuid.UUID, option enums.DeleteOptions) er
 
 	// not complete
 	case enums.Rollback:
-		tx := config.DB.Model(&model.Student{}).Where("id = ?", id).Update("deleted_at", nil)
+		tx := s.db.Model(&model.Student{}).Where("id = ?", id).Update("deleted_at", nil)
 
 		if tx.Error != nil {
 			return tx.Error
@@ -105,7 +109,7 @@ func (s *studentService) DeleteById(id uuid.UUID, option enums.DeleteOptions) er
 
 	// not tested
 	case enums.Hard:
-		tx := config.DB.Unscoped().Where("id = ?", id).Delete(&model.Student{})
+		tx := s.db.Unscoped().Where("id = ?", id).Delete(&model.Student{})
 
 		if tx.Error != nil {
 			return tx.Error
