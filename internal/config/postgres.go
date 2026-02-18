@@ -26,6 +26,10 @@ func ConnectDatabase() (*gorm.DB, error) {
 	maxOpenConns, _ := strconv.Atoi(os.Getenv("POSTGRES_MAX_OPEN_CONNS"))
 	maxIdleConns, _ := strconv.Atoi(os.Getenv("POSTGRES_MAX_IDLE_CONNS"))
 
+	if host == "" || port == "" || user == "" || database == "" {
+		return nil, fmt.Errorf("database environment variables not set properly")
+	}
+
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=%s",
 		host, user, password, database, port, tz,
@@ -33,7 +37,7 @@ func ConnectDatabase() (*gorm.DB, error) {
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		panic(fmt.Sprintf("failed to initialize database, got error: %v", err))
+		return nil, fmt.Errorf("failed to initialize database: %w", err)
 	}
 
 	sqlDB, err := db.DB()

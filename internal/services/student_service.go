@@ -12,7 +12,7 @@ import (
 
 type StudentService interface {
 	Create(student *model.Student) error
-	FindAllPaginated(page, limit int, sort, order string, deleted bool) ([]model.Student, int64, error)
+	FindSome(page, limit int, sort, order string, deleted bool) ([]model.Student, int64, error)
 	FindAll() ([]model.Student, error)
 	FindDetailById(id uuid.UUID) (*model.Student, error)
 	DeleteById(id uuid.UUID, option enums.DeleteOptions) error
@@ -41,7 +41,7 @@ func (s *studentService) FindAll() ([]model.Student, error) {
 	return students, err
 }
 
-func (s *studentService) FindAllPaginated(page, limit int, sort, order string, deleted bool) ([]model.Student, int64, error) {
+func (s *studentService) FindSome(page, limit int, sort, order string, deleted bool) ([]model.Student, int64, error) {
 
 	var students []model.Student
 	var total int64

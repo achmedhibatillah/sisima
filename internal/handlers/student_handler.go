@@ -56,7 +56,7 @@ func (h *studentHandler) FindAllPaginated(c fiber.Ctx) error {
 		order = "ASC"
 	}
 
-	students, total, err := h.service.FindAllPaginated(page, limit, sort, order, deleted)
+	students, total, err := h.service.FindSome(page, limit, sort, order, deleted)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"title":  "INTERNAL_ERROR",
