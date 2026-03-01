@@ -31,13 +31,13 @@ func NewExceptionResponse(title ExceptionTitle, errors interface{}) ExceptionRes
 // Other
 type CreateStudentRequest struct {
 	ID        uuid.UUID `json:"id"`
-	NIS       string    `json:"nis" validate:"required,min=1,max=22"`
-	NISN      string    `json:"nisn" validate:"required,min=1,max=22"`
+	NIS       string    `json:"nis" validate:"max=22"`
+	NISN      string    `json:"nisn" validate:"max=22"`
 	FullName  string    `json:"full_name" validate:"required,min=1,max=70"`
 	NickName  string    `json:"nick_name" validate:"omitempty,min=1,max=20"`
 	Gender    string    `json:"gender" validate:"required,oneof=MALE FEMALE"`
-	EntryYear string    `json:"entry_year" validate:"required,len=4,numeric"`
-	Class     string    `json:"class" validate:"required,len=1,alphaunicode"`
+	EntryYear string    `json:"entry_year" validate:"max=4"`
+	Class     string    `json:"class" validate:"required,len=1,numeric"`
 }
 
 type StudentResponse struct {
