@@ -33,6 +33,9 @@ func (h *studentHandler) FindAllPaginated(c fiber.Ctx) error {
 	limitStr := c.Query("limit", strconv.Itoa(defaultLimit))
 	sort := c.Query("sort", defaultSort)
 	order := c.Query("order", defaultOrder)
+	filterGenderStr := c.Query("gender")
+	filterClassStr := c.Query("class")
+	keyword := c.Query("k")
 
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page < 1 {
@@ -44,14 +47,51 @@ func (h *studentHandler) FindAllPaginated(c fiber.Ctx) error {
 		limit = defaultLimit
 	}
 
-	if sort != "full_name" && sort != "created_at" {
+	if sort != "full_name" && sort != "created_at" && sort != "updated_at" {
 		return c.Status(422).JSON(dto.NewExceptionResponse(
 			dto.InvalidQueryParam,
-			"invalid query param sort, must be either full_name or created_at",
+			"invalid sort query parameter: must be \"full_name\", \"created_at\", or \"updated_at\"",
 		))
 	}
 
-	students, total, err := h.service.FindAllPaginated(page, limit, sort, order)
+	var filterGender model.Gender
+	if filterGenderStr != "" {
+		if filterGenderStr != "male" && filterGenderStr != "female" {
+			return c.Status(422).JSON(dto.NewExceptionResponse(
+				dto.InvalidQueryParam,
+				"invalid gender query parameter: must be \"male\" or \"female\"",
+			))
+		}
+
+		if filterGenderStr == "male" {
+			filterGender = model.Male
+		} else {
+			filterGender = model.Female
+		}
+	}
+
+	validClasses := map[string]bool{
+		"N": true,
+		"1": true,
+		"2": true,
+		"3": true,
+		"4": true,
+		"5": true,
+		"6": true,
+		"L": true,
+	}
+	var filterClass string
+	if filterClassStr != "" {
+		if !validClasses[filterClassStr] {
+			return c.Status(422).JSON(dto.NewExceptionResponse(
+				dto.InvalidQueryParam,
+				"invalid class query parameter: must be \"N\", \"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"L\"",
+			))
+		}
+		filterClass = filterClassStr
+	}
+
+	students, total, err := h.service.FindAllPaginated(page, limit, sort, order, filterGender, filterClass, keyword)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{

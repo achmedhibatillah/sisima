@@ -38,7 +38,7 @@ type CreateStudentRequest struct {
 	NickName  string    `json:"nick_name" validate:"omitempty,min=1,max=20"`
 	Gender    string    `json:"gender" validate:"required,oneof=MALE FEMALE"`
 	EntryYear string    `json:"entry_year" validate:"max=4"`
-	Class     string    `json:"class" validate:"required,len=1,numeric"`
+	Class     string    `json:"class" validate:"required,len=1,oneof=N 1 2 3 4 5 6 L"`
 }
 
 type StudentResponse struct {
