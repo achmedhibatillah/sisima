@@ -26,25 +26,82 @@ func (h *studentHandler) FindAllPaginated(c fiber.Ctx) error {
 		defaultPage  = 1
 		defaultLimit = 10
 		defaultSort  = "full_name"
-		defaultOrder = "ASC"
 	)
 
 	pageStr := c.Query("page", strconv.Itoa(defaultPage))
 	limitStr := c.Query("limit", strconv.Itoa(defaultLimit))
 	sort := c.Query("sort", defaultSort)
-	order := c.Query("order", defaultOrder)
+	filterGenderStr := c.Query("gender")
+	filterClassStr := c.Query("class")
+	keyword := c.Query("k")
 
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page < 1 {
-		page = defaultPage
+		return c.Status(422).JSON(dto.NewExceptionResponse(
+			dto.InvalidQueryParam,
+			"invalid page query parameter: must be negative",
+		))
 	}
 
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil || limit < 1 {
-		limit = defaultLimit
+		return c.Status(422).JSON(dto.NewExceptionResponse(
+			dto.InvalidQueryParam,
+			"invalid limit query parameter: must be negative",
+		))
 	}
 
-	students, total, err := h.service.FindAllPaginated(page, limit, sort, order)
+	var order string
+	if sort != "full_name" && sort != "created_at" && sort != "updated_at" {
+		return c.Status(422).JSON(dto.NewExceptionResponse(
+			dto.InvalidQueryParam,
+			"invalid sort query parameter: must be \"full_name\", \"created_at\", or \"updated_at\"",
+		))
+	}
+	if sort == "full_name" {
+		order = "ASC"
+	} else {
+		order = "DESC"
+	}
+
+	var filterGender model.Gender
+	if filterGenderStr != "" {
+		if filterGenderStr != "male" && filterGenderStr != "female" {
+			return c.Status(422).JSON(dto.NewExceptionResponse(
+				dto.InvalidQueryParam,
+				"invalid gender query parameter: must be \"male\" or \"female\"",
+			))
+		}
+
+		if filterGenderStr == "male" {
+			filterGender = model.Male
+		} else {
+			filterGender = model.Female
+		}
+	}
+
+	validClasses := map[string]bool{
+		"N": true,
+		"1": true,
+		"2": true,
+		"3": true,
+		"4": true,
+		"5": true,
+		"6": true,
+		"L": true,
+	}
+	var filterClass string
+	if filterClassStr != "" {
+		if !validClasses[filterClassStr] {
+			return c.Status(422).JSON(dto.NewExceptionResponse(
+				dto.InvalidQueryParam,
+				"invalid class query parameter: must be \"N\", \"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"L\"",
+			))
+		}
+		filterClass = filterClassStr
+	}
+
+	students, total, err := h.service.FindAllPaginated(page, limit, sort, order, filterGender, filterClass, keyword)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -80,7 +137,7 @@ func (h *studentHandler) FindDetailById(c fiber.Ctx) error {
 		})
 	}
 	response := dto.ToStudentResponse(student)
-	return c.Status(200).JSON(response)
+	return c.Status(200).JSON(dto.NewGetOne[dto.StudentResponse](*response))
 }
 
 func (h *studentHandler) Create(c fiber.Ctx) error {
