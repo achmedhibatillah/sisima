@@ -116,8 +116,7 @@ func (h *studentHandler) FindAllPaginated(c fiber.Ctx) error {
 	response := dtowrapper.NewPaginationWrapperResponse(make([]interface{}, len(students)), page, limit, total)
 
 	for i, v := range students {
-		var student model.Student
-		student = v
+		student := v
 		response.Data[i] = dtodata.ToStudentResponse(&student)
 	}
 
@@ -179,9 +178,15 @@ func (h *studentHandler) Create(c fiber.Ctx) error {
 	return c.Status(201).JSON(response)
 }
 
-func (h *studentHandler) IsIssetName(c fiber.Ctx) error {
-	nameParam := c.Params("full_name")
-	ids, err := h.service.GetIdsByName(nameParam)
+func (h *studentHandler) IsNameExists(c fiber.Ctx) error {
+	var req dtodata.IsFullNameExists
+	if err := c.Bind().Body(&req); err != nil {
+		return c.Status(400).JSON(dtoexception.NewExceptionResponse(dtoexception.ValidationErr, err.Error))
+	}
+
+	full_name := req.FullName
+
+	ids, err := h.service.GetIdsByName(full_name)
 	if err != nil {
 		return c.Status(500).JSON(dtoexception.NewExceptionResponse(dtoexception.InternalErr, err.Error))
 	}

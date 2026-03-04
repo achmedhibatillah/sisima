@@ -7,11 +7,6 @@ import (
 	"github.com/google/uuid"
 )
 
-//
-// Other
-//
-
-// Students
 type CreateStudentRequest struct {
 	ID        uuid.UUID `json:"id"`
 	NIS       string    `json:"nis" validate:"max=22"`
@@ -21,6 +16,10 @@ type CreateStudentRequest struct {
 	Gender    string    `json:"gender" validate:"required,oneof=MALE FEMALE"`
 	EntryYear string    `json:"entry_year" validate:"max=4"`
 	Class     string    `json:"class" validate:"required,len=1,oneof=N 1 2 3 4 5 6 L"`
+}
+
+type IsFullNameExists struct {
+	FullName string `json:"full_name"`
 }
 
 type StudentResponse struct {
