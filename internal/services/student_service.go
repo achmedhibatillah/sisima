@@ -8,7 +8,7 @@ import (
 
 type StudentService interface {
 	Create(student *model.Student) error
-	FindSomeLimited(page, limit int, sort, order string, filterGender model.Gender, filterClass string, keyword string) ([]model.Student, int64, error)
+	FindSomeLimited(page, limit int, sort, order string, filterGender model.Gender, filterClass string, keyword string) ([]model.StudentWithTotalBills, int64, error)
 	FindAll() ([]model.Student, error)
 	FindDetailById(id uuid.UUID) (*model.Student, error)
 	GetIdsByName(full_name string) ([]uuid.UUID, error)
@@ -39,24 +39,26 @@ func (s *studentService) FindSomeLimited(
 	filterGender model.Gender,
 	filterClass string,
 	keyword string,
-) ([]model.Student, int64, error) {
-
-	var students []model.Student
+) ([]model.StudentWithTotalBills, int64, error) {
+	var students []model.StudentWithTotalBills
 	var total int64
 
-	query := config.DB.Model(&model.Student{})
+	query := config.DB.Model(&model.Student{}).
+		Select("students.id, students.full_name, students.nis, students.nisn, students.gender, students.class, count(billings.amount) as total_tagihan").
+		Joins("LEFT JOIN billings ON billings.student_id = students.id").
+		Group("students.id, students.full_name, students.nis, students.nisn, students.gender, students.class")
 
 	if filterGender != "" {
-		query = query.Where("gender = ?", filterGender)
+		query = query.Where("students.gender = ?", filterGender)
 	}
 
 	if filterClass != "" {
-		query = query.Where("class = ?", filterClass)
+		query = query.Where("students.class = ?", filterClass)
 	}
 
 	if keyword != "" {
 		query = query.Where(
-			"LOWER(full_name)  LIKE ? OR nis LIKE ? OR nisn LIKE ?",
+			"LOWER(students.full_name)  LIKE ? OR students.nis LIKE ? OR students.nisn LIKE ?",
 			"%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%",
 		)
 	}
@@ -70,7 +72,6 @@ func (s *studentService) FindSomeLimited(
 		Offset((page - 1) * limit).
 		Order(sort + " " + order).
 		Find(&students).Error
-
 	if err != nil {
 		return nil, 0, err
 	}
@@ -89,12 +90,14 @@ func (s *studentService) FindDetailById(id uuid.UUID) (*model.Student, error) {
 
 func (s *studentService) GetIdsByName(full_name string) ([]uuid.UUID, error) {
 	var ids []uuid.UUID
-	// ids = append(ids, uuid.New())
-	// return ids, nil
 
-	err := config.DB.Select("id").Find(&ids, "full_name = ?", full_name).Error
+	err := config.DB.
+		Model(&model.Student{}).
+		Where("full_name = ?", full_name).
+		Pluck("id", &ids).Error
 	if err != nil {
 		return nil, err
 	}
+
 	return ids, nil
 }

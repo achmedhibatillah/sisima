@@ -19,17 +19,19 @@ type CreateStudentRequest struct {
 }
 
 type IsFullNameExists struct {
-	FullName string `json:"full_name"`
+	FullName string `json:"full_name" validate:"required"`
 }
 
 type StudentResponse struct {
-	ID        uuid.UUID `json:"id"`
-	NIS       string    `json:"nis"`
-	NISN      string    `json:"nisn"`
-	FullName  string    `json:"full_name"`
-	NickName  string    `json:"nick_name"`
-	Gender    string    `json:"gender"`
-	EntryYear string    `json:"entry_year"`
+	ID         uuid.UUID `json:"id"`
+	NIS        string    `json:"nis"`
+	NISN       string    `json:"nisn"`
+	FullName   string    `json:"full_name"`
+	NickName   string    `json:"nick_name"`
+	Gender     string    `json:"gender"`
+	EntryYear  string    `json:"entry_year"`
+	TotalBills int       `json:"total_bills"`
+
 	Class     string    `json:"class"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`

@@ -105,7 +105,6 @@ func (h *studentHandler) FindAllPaginated(c fiber.Ctx) error {
 	}
 
 	students, total, err := h.service.FindSomeLimited(page, limit, sort, order, filterGender, filterClass, keyword)
-
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"title":  "INTERNAL_ERROR",
@@ -117,7 +116,16 @@ func (h *studentHandler) FindAllPaginated(c fiber.Ctx) error {
 
 	for i, v := range students {
 		student := v
-		response.Data[i] = dtodata.ToStudentResponse(&student)
+		response.Data[i] = dtodata.StudentResponse{
+			ID:         student.ID,
+			NIS:        student.NIS,
+			NISN:       student.NISN,
+			FullName:   student.FullName,
+			Gender:     string(student.Gender),
+			CreatedAt:  student.CreatedAt,
+			UpdatedAt:  student.UpdatedAt,
+			TotalBills: student.BillCount,
+		}
 	}
 
 	return c.Status(200).JSON(response)
@@ -181,14 +189,14 @@ func (h *studentHandler) Create(c fiber.Ctx) error {
 func (h *studentHandler) IsNameExists(c fiber.Ctx) error {
 	var req dtodata.IsFullNameExists
 	if err := c.Bind().Body(&req); err != nil {
-		return c.Status(400).JSON(dtoexception.NewExceptionResponse(dtoexception.ValidationErr, err.Error))
+		return c.Status(400).JSON(dtoexception.NewExceptionResponse(dtoexception.ValidationErr, err.Error()))
 	}
 
 	full_name := req.FullName
 
 	ids, err := h.service.GetIdsByName(full_name)
 	if err != nil {
-		return c.Status(500).JSON(dtoexception.NewExceptionResponse(dtoexception.InternalErr, err.Error))
+		return c.Status(500).JSON(dtoexception.NewExceptionResponse(dtoexception.InternalErr, err.Error()))
 	}
 	return c.Status(200).JSON(dtowrapper.NewNormalWrapperResponse(ids))
 }
