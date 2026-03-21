@@ -1,6 +1,8 @@
 package service
 
 import (
+	"strings"
+
 	"github.com/dvvnFrtn/sisima/internal/config"
 	model "github.com/dvvnFrtn/sisima/internal/models"
 	"github.com/google/uuid"
@@ -57,9 +59,10 @@ func (s *studentService) FindSomeLimited(
 	}
 
 	if keyword != "" {
+		kw := strings.ToLower(keyword)
 		query = query.Where(
-			"LOWER(students.full_name)  LIKE ? OR students.nis LIKE ? OR students.nisn LIKE ?",
-			"%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%",
+			"LOWER(students.full_name) LIKE ? OR students.nis LIKE ? OR students.nisn LIKE ?",
+			"%"+kw+"%", "%"+kw+"%", "%"+kw+"%",
 		)
 	}
 

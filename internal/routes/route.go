@@ -17,7 +17,6 @@ func StudentRoutes(app *fiber.App) {
 	resource := app.Group("/student")
 
 	resource.Get("", handler.FindAllPaginated)
-	resource.Post("/exists/name", handler.IsNameExists)
 	resource.Get("/:id", handler.FindDetailById)
 	resource.Post("", handler.Create)
 }

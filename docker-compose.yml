@@ -1,30 +1,54 @@
 version: "3.9"
 
 services:
-  postgres:
+  server:
+    build: .
+    container_name: sisima_app
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    environment:
+      SERVER_PORT: ${SERVER_PORT}
+      POSTGRES_HOST: sisima_postgres
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+      POSTGRES_TZ: ${POSTGRES_TZ}
+    networks:
+     - network
+    depends_on:
+      sisima_postgres:
+        condition: service_healthy
+
+  sisima_postgres:
     image: postgres:16
     container_name: sisima_postgre
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DATABASE}
-    ports:
-      - "5432:5432"
+      POSTGRES_TZ: ${POSTGRES_TZ}
+    # ports:
+    #   - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - database:/var/lib/postgresql/data
     networks:
-      - backend
+      - network 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DATABASE}"]
+      interval: 5s
+      retries: 10
+      timeout: 5s
 
-  redis:
+  sisima_redis:
     image: redis:7
     container_name: sisima_redis
-    ports:
-      - "6379:6379"
+    # ports:
+    #   - "6379:6379"
     networks:
-      - backend
+      - network 
 
 networks:
-  backend:
+  network:
 
 volumes:
-  pgdata:
+  database:
