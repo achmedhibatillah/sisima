@@ -1,5 +1,4 @@
 FROM golang:1.26 AS builder
-# FROM golang:1.26
 WORKDIR /usr/src/app
 
 COPY go.mod go.sum ./
@@ -23,4 +22,3 @@ ENV \
     POSTGRES_DATABASE=sisima
 
 CMD ["./app", "&&", "ls", "-la"]
-# CMD ["env"]
