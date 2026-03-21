@@ -30,5 +30,5 @@ func main() {
 	route.StudentRoutes(app)
 	route.BillingRoutes(app)
 
-	app.Listen(os.Getenv("SERVER_PORT"))
+	app.Listen(":" + os.Getenv("SERVER_PORT"))
 }

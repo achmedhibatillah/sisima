@@ -7,10 +7,9 @@ RUN go mod download
 COPY ./cmd ./cmd
 COPY ./internal ./internal
 
-# FROM alpine:3.1
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o /usr/local/bin/app ./cmd/sisima
 
-FROM alpine:3.1
+FROM scratch
 COPY --from=builder /usr/local/bin/app /app
 ENV \
     SERVER_HOST=127.0.0.1 \
