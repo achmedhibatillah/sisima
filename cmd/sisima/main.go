@@ -6,7 +6,7 @@ import (
 	"github.com/dvvnFrtn/sisima/internal/config"
 	// "github.com/dvvnFrtn/sisima/internal/logger"
 
-	// model "github.com/dvvnFrtn/sisima/internal/models"
+	model "github.com/dvvnFrtn/sisima/internal/models"
 	route "github.com/dvvnFrtn/sisima/internal/routes"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/cors"
@@ -14,7 +14,7 @@ import (
 
 func main() {
 	config.ConnectDatabase()
-	// model.Migrate()
+	model.Migrate()
 
 	app := fiber.New()
 

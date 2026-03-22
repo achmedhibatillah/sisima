@@ -18,6 +18,16 @@ type CreateStudentRequest struct {
 	Class     string    `json:"class" validate:"required,len=1,oneof=N 1 2 3 4 5 6 L"`
 }
 
+type UpdateStudentRequest struct {
+	NIS       string `json:"nis" validate:"max=22"`
+	NISN      string `json:"nisn" validate:"max=22"`
+	FullName  string `json:"full_name" validate:"min=1,max=70"`
+	NickName  string `json:"nick_name" validate:"min=1,max=20"`
+	Gender    string `json:"gender" validate:"oneof=MALE FEMALE"`
+	EntryYear string `json:"entry_year" validate:"max=4"`
+	Class     string `json:"class" validate:"len=1,oneof=N 1 2 3 4 5 6 L"`
+}
+
 type IsFullNameExists struct {
 	FullName string `json:"full_name" validate:"required"`
 }

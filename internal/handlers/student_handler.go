@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"strconv"
 
 	dtodata "github.com/dvvnFrtn/sisima/internal/dto/dto_data"
@@ -184,4 +185,31 @@ func (h *studentHandler) Create(c fiber.Ctx) error {
 	response := dtodata.ToStudentResponse(student)
 
 	return c.Status(201).JSON(response)
+}
+
+// not complete
+func (h *studentHandler) Update(c fiber.Ctx) error {
+	var req dtodata.UpdateStudentRequest
+
+	if err := c.Bind().Body(&req); err != nil {
+		c.Status(400).JSON(dtoexception.NewExceptionResponse(dtoexception.InvalidRequest, err.Error()))
+	}
+
+	idParam := c.Params("id")
+	id, err := uuid.Parse(idParam)
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"title": "INVALID_ID",
+		})
+	}
+
+	// here
+	student, err := h.service.FindDetailById(id)
+	if err != nil {
+		return c.Status(404).JSON(dtoexception.NewExceptionResponse(dtoexception.NotFound, nil))
+	}
+
+	fmt.Println(student)
+
+	return c.SendStatus(200)
 }
